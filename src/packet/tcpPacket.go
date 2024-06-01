@@ -54,7 +54,7 @@ func SendSYNPacket(handle *pcap.Handle, srcIP, dstIP net.IP, srcPort, dstPort in
 }
 
 // 捕获TCP报文查看是否为ACK或者RST
-func CatchTCPPacket(handle *pcap.Handle, srcPort, dstPort int) (bool, error) {
+func CatchTCPPacket(handle *pcap.Handle, srcPort int) (bool, error) {
 	packets := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packets.Packets() {
 		tcpLayer := packet.Layer(layers.LayerTypeTCP)

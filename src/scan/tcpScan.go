@@ -98,7 +98,7 @@ func openedSYN(dstIP net.IP, srcPort, dstPort int, dstMAC net.HardwareAddr, liCh
 		fmt.Println(err)
 	}
 
-	if ok, _ := packet.CatchTCPPacket(handle, srcPort, dstPort); ok {
+	if ok, _ := packet.CatchTCPPacket(handle, srcPort); ok {
 		liChan <- dstPort
 		return
 	}
@@ -166,11 +166,12 @@ func (ipa *TCPipAdd) StealthScan() ([]int, error) {
 	return ret, nil
 }
 
-func (ipa *TCPipAdd) FinScan() ([]int, error) {
-	if len(ipa.Addresses) > 1 {
-		return nil, fmt.Errorf("TOO MANY IP!  MULTI-THREAD ONLY SUPPORT PORTS!  ONLY ONE IP SUPPORT!")
-	}
-	var ret []int
-
-	return ret, nil
-}
+//func (ipa *TCPipAdd) FinScan() ([]int, error) {
+//	//--------------------------------------------------------------------------------
+//	if len(ipa.Addresses) > 1 {
+//		return nil, fmt.Errorf("TOO MANY IP!  MULTI-THREAD ONLY SUPPORT PORTS!  ONLY ONE IP SUPPORT!")
+//	}
+//	var ret []int
+//
+//	return ret, nil
+//}

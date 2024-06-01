@@ -11,14 +11,14 @@ import (
 )
 
 type IPAddress struct {
-	addresses []string
-	ports     []int
+	Addresses []string
+	Ports     []int
 }
 
 type ProtocolSelect interface {
 	SelectTCP(function int) ([]int, error)
 	SelectUDP(function int) ([]int, error)
-	SelectICMP(function int) ([]int, error)
+	SelectICMP(function int) ([]string, error)
 }
 
 // 参数转换
@@ -48,7 +48,7 @@ func ParaConvert(ip string, ports string) (IPAddress, error) {
 			start := ipToUint32(strings.TrimSpace(ti[0]))
 			end := ipToUint32(strings.TrimSpace(ti[1]))
 			for i := start; i <= end; i++ {
-				ret.addresses = append(ret.addresses, uint32ToIP(i))
+				ret.Addresses = append(ret.Addresses, uint32ToIP(i))
 			}
 		} else if strings.Contains(v, "/") {
 			_, ipWithMask, _ := net.ParseCIDR(strings.TrimSpace(v))
@@ -61,13 +61,13 @@ func ParaConvert(ip string, ports string) (IPAddress, error) {
 				uint32IP := uint32(startIP[0])<<24 | uint32(startIP[1])<<16 | uint32(startIP[2])<<8 | uint32(startIP[3])
 				endIP := uint32IP + uint32(math.Pow(2, float64(32-maskLen)))
 				for i := uint32IP; i < endIP; i++ {
-					ret.addresses = append(ret.addresses, uint32ToIP(i))
+					ret.Addresses = append(ret.Addresses, uint32ToIP(i))
 				}
 			} else {
 				return ret, fmt.Errorf("IP MASK TOO LONG")
 			}
 		} else {
-			ret.addresses = append(ret.addresses, v)
+			ret.Addresses = append(ret.Addresses, v)
 		}
 	}
 
@@ -77,11 +77,11 @@ func ParaConvert(ip string, ports string) (IPAddress, error) {
 			start, _ := strconv.Atoi(strings.TrimSpace(tp[0]))
 			end, _ := strconv.Atoi(strings.TrimSpace(tp[1]))
 			for i := start; i <= end; i++ {
-				ret.ports = append(ret.ports, i)
+				ret.Ports = append(ret.Ports, i)
 			}
 		} else {
 			port, _ := strconv.Atoi(strings.TrimSpace(v))
-			ret.ports = append(ret.ports, port)
+			ret.Ports = append(ret.Ports, port)
 		}
 	}
 	return ret, nil
@@ -128,15 +128,15 @@ func AliveDevice(ips []string) []string {
 
 func (ipa *IPAddress) SelectTCP(function int) ([]int, error) {
 	var tia scan.TCPipAdd
-	tia.Addresses = ipa.addresses
-	tia.Ports = ipa.ports
+	tia.Addresses = ipa.Addresses
+	tia.Ports = ipa.Ports
 	switch function {
 	case 1:
 		return tia.TCPConnect()
 	case 2:
 		return tia.StealthScan()
-	case 3:
-		return tia.FinScan()
+	//case 3:
+	//	return tia.FinScan()
 	default:
 		return nil, fmt.Errorf("error para")
 	}
@@ -144,8 +144,8 @@ func (ipa *IPAddress) SelectTCP(function int) ([]int, error) {
 
 func (ipa *IPAddress) SelectUDP(function int) ([]int, error) {
 	var uia scan.UDPipADD
-	uia.Addresses = ipa.addresses
-	uia.Ports = ipa.ports
+	uia.Addresses = ipa.Addresses
+	uia.Ports = ipa.Ports
 	switch function {
 	case 1:
 		return uia.UdpScanPort()
@@ -155,10 +155,12 @@ func (ipa *IPAddress) SelectUDP(function int) ([]int, error) {
 	}
 }
 
-func (ipa *IPAddress) SelectICMP(function int) ([]int, error) {
-	//---------------------------------------------
+func (ipa *IPAddress) SelectICMP(function int) ([]string, error) {
+	var iia scan.ICMPipAdd
+	iia.Addresses = ipa.Addresses
 	switch function {
-
+	case 1:
+		return iia.IcmpAliveScan()
 	default:
 		return nil, fmt.Errorf("error para")
 	}
