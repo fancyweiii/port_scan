@@ -84,7 +84,7 @@ func (ipa *TCPipAdd) TCPConnect() ([]int, error) {
 
 func openedSYN(dstIP net.IP, srcPort, dstPort int, dstMAC net.HardwareAddr, liChan chan int) {
 	// device需要根据网卡具体获取（pcap.FindAllDev()）
-	handle, err := pcap.OpenLive("\\Device\\NPF_{B3997851-87D5-4CE8-8D87-320F6E89557B}", 1600, true, pcap.BlockForever)
+	handle, err := pcap.OpenLive(ethName, 1600, true, pcap.BlockForever)
 
 	defer handle.Close()
 
@@ -108,7 +108,7 @@ func openedSYN(dstIP net.IP, srcPort, dstPort int, dstMAC net.HardwareAddr, liCh
 
 // SYN扫描
 func (ipa *TCPipAdd) StealthScan() ([]int, error) {
-	handle, err := pcap.OpenLive("\\Device\\NPF_{B3997851-87D5-4CE8-8D87-320F6E89557B}", 1600, true, pcap.BlockForever)
+	handle, err := pcap.OpenLive(ethName, 1600, true, pcap.BlockForever)
 
 	if err != nil {
 		fmt.Println(err)
