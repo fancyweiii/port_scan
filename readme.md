@@ -1,6 +1,7 @@
 # Port Scan
 ## 介绍
-使用golang实现主机扫描和端口扫描功能，支持使用TCP和ICMP协议进行主机存活扫描和使用TCP连接、SYN半连接和UDP报文回显来扫描开放端口和关闭端口
+使用golang实现主机扫描和端口扫描功能，支持使用TCP和ICMP协议进行主机存活扫描和使用TCP连接、SYN半连接和UDP报文回显来扫描开放端口和关闭端口  
+若干功能尚未实现（FIN扫描 UDP扫描）
 ## 依赖
 ```
 go get github.com/google/gopacket
