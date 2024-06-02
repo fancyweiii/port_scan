@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+
+
+//----------------------------------------Failed to scan-----------------------------------------------------
+
 type UDPipADD struct {
 	Addresses []string
 	Ports     []int
