@@ -45,7 +45,7 @@ func TestIPAddress_SelectTCP(t *testing.T) {
 }
 
 func TestIPAddress_SelectUDP(t *testing.T) {
-	ip := "192.168.3.1"
+	ip := "10.31.0.1"
 	port := ""
 	ipa, _ := ParaConvert(ip, port)
 	fmt.Println("UDP扫描只能确定关闭的端口 不能确定被过滤报文的情况")

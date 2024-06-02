@@ -40,7 +40,7 @@ func udpScanMul(dIP string, port int) {
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		//return
 	}
 }
 
@@ -58,20 +58,21 @@ func catchICMP(startTime int64, clChan chan int) {
 	// 设置只过滤icmp报文
 	handle.SetBPFFilter("icmp")
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
-	for packet := range packetSource.Packets() {
+	time.Sleep(time.Second * 2)
+	for pac := range packetSource.Packets() {
 		//对icmp报文进行解析
-		ipLayer := packet.Layer(layers.LayerTypeIPv4)
+		ipLayer := pac.Layer(layers.LayerTypeIPv4)
 		if ipLayer != nil {
 			ip, _ := ipLayer.(*layers.IPv4)
 			innerPacket := gopacket.NewPacket(ip.Payload, layers.LayerTypeICMPv4, gopacket.Default)
 			udpLayer := innerPacket.Data()
-			clChan <- int(binary.LittleEndian.Uint16(udpLayer[30:32]))
-
+			port := int(binary.BigEndian.Uint16(udpLayer[30:32]))
+			clChan <- port
 		}
 
-		if time.Now().Unix()-startTime >= 5 {
-			return
-		}
+		//if time.Now().Unix()-startTime >= 5 {
+		//	return
+		//}
 
 	}
 }
@@ -84,13 +85,17 @@ func (ipa *UDPipADD) UdpScanPort() ([]int, error) {
 	dstIP := ipa.Addresses[0]
 	var ret []int
 
-	//取当前时间用于结束循环
 	startTime := time.Now().Unix()
 
-	closeChan := make(chan int, 1000)
+	chLen := len(ipa.Ports)
+	if chLen == 0 {
+		chLen = 1000
+	}
+	closeChan := make(chan int, chLen)
 	go catchICMP(startTime, closeChan)
 
 	if ipa.Ports == nil {
+
 		for port := 1; port < 1001; port++ {
 			go udpScanMul(dstIP, port)
 		}
@@ -100,15 +105,18 @@ func (ipa *UDPipADD) UdpScanPort() ([]int, error) {
 		}
 	}
 
+overloop:
 	for {
-		v := <-closeChan
-		if time.Now().Unix()-startTime >= 7 {
-			break
-		}
-		if v != 0 {
-			ret = append(ret, v)
+		select {
+		case val := <-closeChan:
+			if val != 0 {
+				ret = append(ret, val)
+			}
+		case <-time.After(5 * time.Second):
+			break overloop
 		}
 	}
+
 	close(closeChan)
 
 	return ret, nil
